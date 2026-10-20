@@ -12,7 +12,11 @@
         android:id="@+id/word"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#1B1B1F"
+        android:shadowColor="#99000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -22,6 +26,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:textColor="#44474F"
+        android:shadowColor="#99000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="4"
+        android:textColor="#FFFFFF"
         android:textSize="16sp" />
 </LinearLayout>
