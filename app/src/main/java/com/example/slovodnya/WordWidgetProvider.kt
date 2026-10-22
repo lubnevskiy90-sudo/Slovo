@@ -65,9 +65,10 @@ class WordWidgetProvider : AppWidgetProvider() {
             views.setTextColor(R.id.translation, pal.text)
 
             // пример показываем, только если виджет вытянут по высоте
+            val exampleText = if (word.a.isNotEmpty()) "${word.e} — ${word.a}" else word.e
             val showExample = word.e.isNotEmpty() && hDp >= 180
             views.setViewVisibility(R.id.example, if (showExample) View.VISIBLE else View.GONE)
-            views.setTextViewText(R.id.example, word.e)
+            views.setTextViewText(R.id.example, exampleText)
             views.setTextColor(R.id.example, pal.sub)
 
             val isFav = Prefs.isFavorite(context, word.w)

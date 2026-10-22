@@ -87,8 +87,11 @@ class MainActivity : Activity() {
         card.addView(label(today.w, 34f, pal.text, bold = true), params(4))
         card.addView(label(today.t, 18f, pal.text), params(2))
         if (today.e.isNotEmpty()) {
-            card.addView(label("Пример", 12f, pal.sub, bold = true), params(14))
+            card.addView(label(today.kindLabel, 12f, pal.sub, bold = true), params(14))
             card.addView(label(today.e, 16f, pal.text, italic = true), params(2))
+            if (today.a.isNotEmpty()) {
+                card.addView(label("— ${today.a}", 13f, pal.sub), params(2))
+            }
         }
         val isFav = Prefs.isFavorite(this, today.w)
         card.addView(
@@ -163,6 +166,7 @@ class MainActivity : Activity() {
         col.addView(label(w.w, 20f, pal.text, bold = true))
         col.addView(label(w.t, 15f, pal.text), params(2))
         if (w.e.isNotEmpty()) col.addView(label(w.e, 14f, pal.sub, italic = true), params(4))
+        if (w.a.isNotEmpty()) col.addView(label("— ${w.a}", 12f, pal.sub), params(2))
         row.addView(col, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
 
         val remove = label("✕", 20f, pal.sub).apply {

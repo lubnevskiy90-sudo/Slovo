@@ -4,7 +4,15 @@ import android.content.Context
 import org.json.JSONArray
 import java.util.TimeZone
 
-data class Word(val w: String, val t: String, val e: String)
+data class Word(
+    val w: String,
+    val t: String,
+    val e: String,
+    val k: String = "",   // вид: «Прыказка», «Цытата»… (пусто = «Пример»)
+    val a: String = ""    // источник (необязательно)
+) {
+    val kindLabel: String get() = if (k.isEmpty()) "Пример" else k
+}
 
 object Words {
     private var cache: List<Word>? = null
@@ -15,7 +23,10 @@ object Words {
         val arr = JSONArray(json)
         val list = List(arr.length()) { i ->
             val o = arr.getJSONObject(i)
-            Word(o.getString("w"), o.getString("t"), o.optString("e", ""))
+            Word(
+                o.getString("w"), o.getString("t"), o.optString("e", ""),
+                o.optString("k", ""), o.optString("a", "")
+            )
         }
         cache = list
         return list
