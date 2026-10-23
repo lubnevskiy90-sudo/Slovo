@@ -19,6 +19,8 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         build()
+        WordWidgetProvider.updateAll(this)
+        DailyUpdate.schedule(this)
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

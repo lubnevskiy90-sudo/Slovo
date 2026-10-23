@@ -13,8 +13,19 @@ import android.widget.RemoteViews
 
 class WordWidgetProvider : AppWidgetProvider() {
 
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        DailyUpdate.schedule(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        DailyUpdate.cancel(context)
+    }
+
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         for (id in ids) render(context, manager, id)
+        DailyUpdate.schedule(context)
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -25,9 +36,20 @@ class WordWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == ACTION_TOGGLE_FAV) {
-            Prefs.toggleFavorite(context, Words.today(context).w)
-            updateAll(context)
+        when (intent.action) {
+            ACTION_TOGGLE_FAV -> {
+                Prefs.toggleFavorite(context, Words.today(context).w)
+                updateAll(context)
+            }
+            DailyUpdate.ACTION_DAILY,
+            Intent.ACTION_DATE_CHANGED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_MY_PACKAGE_REPLACED -> {
+                updateAll(context)
+                DailyUpdate.schedule(context)
+            }
         }
     }
 
