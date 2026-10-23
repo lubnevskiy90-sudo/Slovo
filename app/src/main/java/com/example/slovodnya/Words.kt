@@ -8,8 +8,14 @@ data class Word(
     val w: String,
     val t: String,
     val e: String,
-    val k: String = "",   // вид: «Прыказка», «Цытата»… (пусто = «Пример»)
-    val a: String = ""    // источник (необязательно)
+    val k: String = "",    // вид примера: «Прыказка», «Цытата»… (пусто = «Пример»)
+    val a: String = "",    // источник примера (необязательно)
+    val en: String = "",   // перевод на английский
+    val ei: String = "",   // транскрипция английского слова
+    val de: String = "",   // перевод на немецкий
+    val di: String = "",   // транскрипция немецкого слова (IPA)
+    val er: String = "",   // чтение английского слова русскими буквами
+    val dr: String = ""    // чтение немецкого слова русскими буквами
 ) {
     val kindLabel: String get() = if (k.isEmpty()) "Пример" else k
 }
@@ -25,7 +31,10 @@ object Words {
             val o = arr.getJSONObject(i)
             Word(
                 o.getString("w"), o.getString("t"), o.optString("e", ""),
-                o.optString("k", ""), o.optString("a", "")
+                o.optString("k", ""), o.optString("a", ""),
+                o.optString("en", ""), o.optString("ei", ""),
+                o.optString("de", ""), o.optString("di", ""),
+                o.optString("er", ""), o.optString("dr", "")
             )
         }
         cache = list

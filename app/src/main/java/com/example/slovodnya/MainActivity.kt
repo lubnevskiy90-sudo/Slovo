@@ -88,6 +88,7 @@ class MainActivity : Activity() {
         card.addView(label("СЛОВО ДНЯ", 12f, pal.sub, bold = true))
         card.addView(label(today.w, 34f, pal.text, bold = true), params(4))
         card.addView(label(today.t, 18f, pal.text), params(2))
+        addTranslations(card, today, pal, true)
         if (today.e.isNotEmpty()) {
             card.addView(label(today.kindLabel, 12f, pal.sub, bold = true), params(14))
             card.addView(label(today.e, 16f, pal.text, italic = true), params(2))
@@ -154,6 +155,18 @@ class MainActivity : Activity() {
         setContentView(scroll)
     }
 
+    private fun addTranslations(parent: LinearLayout, w: Word, pal: Palette, big: Boolean) {
+        val size = if (big) 15f else 13f
+        if (w.en.isNotEmpty()) {
+            val line = "EN  ${w.en}  [${w.ei}]" + if (w.er.isNotEmpty()) "  ≈ ${w.er}" else ""
+            parent.addView(label(line, size, pal.sub), params(if (big) 10 else 4))
+        }
+        if (w.de.isNotEmpty()) {
+            val line = "DE  ${w.de}  [${w.di}]" + if (w.dr.isNotEmpty()) "  ≈ ${w.dr}" else ""
+            parent.addView(label(line, size, pal.sub), params(2))
+        }
+    }
+
     private fun favRow(w: Word, pal: Palette): View {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -167,6 +180,7 @@ class MainActivity : Activity() {
         val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         col.addView(label(w.w, 20f, pal.text, bold = true))
         col.addView(label(w.t, 15f, pal.text), params(2))
+        addTranslations(col, w, pal, false)
         if (w.e.isNotEmpty()) col.addView(label(w.e, 14f, pal.sub, italic = true), params(4))
         if (w.a.isNotEmpty()) col.addView(label("— ${w.a}", 12f, pal.sub), params(2))
         row.addView(col, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
