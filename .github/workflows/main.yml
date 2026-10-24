@@ -4,11 +4,40 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Apply update zip (if any)
+        run: |
+          shopt -s nullglob
+          zips=(*.zip)
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "No zip, building as is"
+            exit 0
+          fi
+          for z in "${zips[@]}"; do
+            rm -rf /tmp/upd && mkdir /tmp/upd
+            unzip -q -o "$z" -d /tmp/upd
+            src=$(find /tmp/upd -maxdepth 2 -type d -name app | head -n 1)
+            if [ -z "$src" ]; then
+              echo "No app folder inside $z"
+              exit 1
+            fi
+            cp -r "$src"/. app/
+            git rm -q "$z"
+          done
+          cur=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
+          sed -i "s/versionCode = $cur/versionCode = $((cur+1))/" app/build.gradle.kts
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Apply update from zip"
+          git push
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
