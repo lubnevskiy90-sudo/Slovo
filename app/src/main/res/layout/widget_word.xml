@@ -20,14 +20,12 @@
         android:paddingEnd="40dp"
         android:paddingBottom="30dp">
 
-        <TextView
-            android:id="@+id/word"
+        <ImageView
+            android:id="@+id/wordImg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="#222222"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter" />
 
         <TextView
             android:id="@+id/translation"

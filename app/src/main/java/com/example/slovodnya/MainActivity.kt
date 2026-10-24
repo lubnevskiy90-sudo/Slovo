@@ -139,7 +139,7 @@ class MainActivity : Activity() {
         val today = Words.today(this)
         val card = cardBox(pal)
         card.addView(label("СЛОВО ДНЯ", 12f, pal.sub, bold = true))
-        card.addView(label(today.title, 34f, pal.text, bold = true), params(4))
+        card.addView(StressWordView(this, today.title, 34f, pal.text, true), params(4))
         card.addView(label(today.t, 18f, pal.text), params(2))
         addTranslations(card, today, pal, true)
         if (today.e.isNotEmpty()) {
@@ -194,7 +194,7 @@ class MainActivity : Activity() {
             }
         }
         val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        col.addView(label(w.title, 20f, pal.text, bold = true))
+        col.addView(StressWordView(this, w.title, 20f, pal.text, true))
         col.addView(label(w.t, 15f, pal.text), params(2))
         addTranslations(col, w, pal, false)
         if (w.e.isNotEmpty()) col.addView(label(w.e, 14f, pal.sub, italic = true), params(4))

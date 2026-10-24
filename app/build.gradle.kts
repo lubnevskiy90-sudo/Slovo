@@ -14,7 +14,7 @@ android {
         applicationId = "com.example.slovodnya"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
+        versionCode = 8
         versionName = "1.1"
     }
 
