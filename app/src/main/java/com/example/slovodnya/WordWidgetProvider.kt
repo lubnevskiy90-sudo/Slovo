@@ -81,7 +81,7 @@ class WordWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_word)
             views.setImageViewBitmap(R.id.bg, OrnamentBackground.create(context, wDp, hDp, pal))
 
-            views.setTextViewText(R.id.word, word.w)
+            views.setTextViewText(R.id.word, word.title)
             views.setTextViewText(R.id.translation, word.t)
             views.setTextColor(R.id.word, pal.text)
             views.setTextColor(R.id.translation, pal.text)
