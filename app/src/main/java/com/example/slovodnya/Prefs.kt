@@ -31,4 +31,11 @@ object Prefs {
     fun setTheme(c: Context, index: Int) {
         sp(c).edit().putInt("theme", index).apply()
     }
+
+    /** Что показывает виджет: 0 = слово дня, 1 = прымаўка дня. */
+    fun widgetMode(c: Context): Int = sp(c).getInt("widget_mode", 0)
+
+    fun setWidgetMode(c: Context, mode: Int) {
+        sp(c).edit().putInt("widget_mode", mode).apply()
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.slovodnya
 
 import android.app.Activity
+import android.os.Bundle
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -16,7 +17,13 @@ import android.widget.TextView
 
 class MainActivity : Activity() {
 
-    private var tab = 0   // 0 = слова, 1 = прымаўкі
+    private var tab = 0   // 0 = слова, 1 = прымаўкі, 2 = настройки
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val t = intent?.getIntExtra("tab", -1) ?: -1
+        if (t in 0..2) tab = t
+    }
 
     override fun onResume() {
         super.onResume()
@@ -65,7 +72,7 @@ class MainActivity : Activity() {
     private fun tabButton(text: String, selected: Boolean, pal: Palette, onClick: () -> Unit): TextView =
         TextView(this).apply {
             this.text = text
-            textSize = 16f
+            textSize = 15f
             gravity = Gravity.CENTER
             setTypeface(null, Typeface.BOLD)
             setTextColor(if (selected) pal.onMain else pal.text)
@@ -108,26 +115,22 @@ class MainActivity : Activity() {
 
         // --- вкладки ---
         val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val lpLeft = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            .apply { marginEnd = dp(6) }
-        val lpRight = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            .apply { marginStart = dp(6) }
-        bar.addView(tabButton("Слова", tab == 0, pal) { tab = 0; build() }, lpLeft)
-        bar.addView(tabButton("Прымаўкі", tab == 1, pal) { tab = 1; build() }, lpRight)
+        val names = listOf("Слова", "Прымаўкі", "Настройки")
+        names.forEachIndexed { i, name ->
+            val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                .apply {
+                    marginStart = if (i == 0) 0 else dp(4)
+                    marginEnd = if (i == names.lastIndex) 0 else dp(4)
+                }
+            bar.addView(tabButton(name, tab == i, pal) { tab = i; build() }, lp)
+        }
         root.addView(bar, params())
 
-        if (tab == 0) addWords(root, pal) else addProverb(root, pal)
-        addThemes(root, pal)
-
-        root.addView(
-            label(
-                "Виджет добавляется долгим тапом по рабочему столу: «Виджеты» → «Слова дня». " +
-                    "Звёздочка на виджете добавляет слово в избранное. " +
-                    "Если растянуть виджет по высоте, под словом появится пример.",
-                13f, pal.sub
-            ),
-            params(28)
-        )
+        when (tab) {
+            0 -> addWords(root, pal)
+            1 -> addProverb(root, pal)
+            else -> addSettings(root, pal)
+        }
 
         val scroll = ScrollView(this)
         scroll.addView(root)
@@ -235,9 +238,26 @@ class MainActivity : Activity() {
         )
     }
 
+    // ---------------- Настройки ----------------
+    private fun addSettings(root: LinearLayout, pal: Palette) {
+        addThemes(root, pal)
+        root.addView(label("ВИДЖЕТ", 12f, pal.sub, bold = true), params(28))
+        root.addView(
+            label(
+                "Добавить: долгий тап по рабочему столу → «Виджеты» → «Слова дня».\n" +
+                    "Стрелка ↔ слева на виджете переключает слово дня и прымаўку дня.\n" +
+                    "Звёздочка справа добавляет слово в избранное.\n" +
+                    "Если растянуть виджет по высоте, появятся пример или значение прымаўки.\n" +
+                    "Тап по виджету открывает приложение на нужной вкладке.",
+                14f, pal.text
+            ),
+            params(8)
+        )
+    }
+
     // ---------------- Тема ----------------
     private fun addThemes(root: LinearLayout, pal: Palette) {
-        root.addView(label("ТЕМА", 12f, pal.sub, bold = true), params(28))
+        root.addView(label("ТЕМА", 12f, pal.sub, bold = true), params(24))
         val group = RadioGroup(this).apply { orientation = RadioGroup.VERTICAL }
         Themes.all.forEachIndexed { i, t ->
             val rb = RadioButton(this).apply {
