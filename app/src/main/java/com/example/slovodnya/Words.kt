@@ -63,18 +63,40 @@ object Words {
 }
 
 object Proverbs {
-    private var cache: List<Proverb>? = null
+    private var builtin: List<Proverb>? = null
 
-    fun all(context: Context): List<Proverb> {
-        cache?.let { return it }
+    private fun loadBuiltin(context: Context): List<Proverb> {
+        builtin?.let { return it }
         val json = context.assets.open("proverbs.json").bufferedReader().use { it.readText() }
         val arr = JSONArray(json)
         val list = List(arr.length()) { i ->
             val o = arr.getJSONObject(i)
             Proverb(o.getString("p"), o.getString("m"), o.optString("a", ""))
         }
-        cache = list
+        builtin = list
         return list
+    }
+
+    private var adult: List<Proverb>? = null
+
+    private fun loadAdult(context: Context): List<Proverb> {
+        adult?.let { return it }
+        val json = context.assets.open("proverbs_adult.json").bufferedReader().use { it.readText() }
+        val arr = JSONArray(json)
+        val list = List(arr.length()) { i ->
+            val o = arr.getJSONObject(i)
+            Proverb(o.getString("p"), o.optString("m", ""), o.optString("a", ""))
+        }
+        adult = list
+        return list
+    }
+
+    fun all(context: Context): List<Proverb> {
+        val custom = Prefs.customProverbs(context)
+        if (Prefs.onlyCustom(context) && custom.isNotEmpty()) return custom
+        val base = loadBuiltin(context) +
+            (if (Prefs.showAdult(context)) loadAdult(context) else emptyList())
+        return base + custom
     }
 
     fun today(context: Context): Proverb {

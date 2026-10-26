@@ -141,7 +141,7 @@ class WordWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.example, View.GONE)
                 views.setViewVisibility(R.id.fav, View.GONE)
                 views.setViewVisibility(R.id.proverb, View.VISIBLE)
-                views.setViewVisibility(R.id.proverbMeaning, vis(tall))
+                views.setViewVisibility(R.id.proverbMeaning, vis(tall && pr.m.isNotEmpty()))
 
                 views.setTextViewText(R.id.proverb, pr.p)
                 views.setTextColor(R.id.proverb, pal.text)

@@ -2,6 +2,9 @@ package com.example.slovodnya
 
 import android.app.Activity
 import android.os.Bundle
+import android.text.InputType
+import android.widget.CheckBox
+import android.widget.EditText
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -222,8 +225,10 @@ class MainActivity : Activity() {
         val card = cardBox(pal)
         card.addView(label("ПРЫМАЎКА ДНЯ", 12f, pal.sub, bold = true))
         card.addView(label(pr.p, 24f, pal.text, bold = true), params(8))
-        card.addView(label("ЗНАЧЕНИЕ", 12f, pal.sub, bold = true), params(18))
-        card.addView(label(pr.m, 16f, pal.text), params(2))
+        if (pr.m.isNotEmpty()) {
+            card.addView(label("ЗНАЧЕНИЕ", 12f, pal.sub, bold = true), params(18))
+            card.addView(label(pr.m, 16f, pal.text), params(2))
+        }
         if (pr.a.isNotEmpty()) {
             card.addView(label("РУССКИЙ АНАЛОГ", 12f, pal.sub, bold = true), params(14))
             card.addView(label(pr.a, 16f, pal.text, italic = true), params(2))
@@ -241,6 +246,8 @@ class MainActivity : Activity() {
     // ---------------- Настройки ----------------
     private fun addSettings(root: LinearLayout, pal: Palette) {
         addThemes(root, pal)
+        addAdultToggle(root, pal)
+        addCustomProverbs(root, pal)
         root.addView(label("ВИДЖЕТ", 12f, pal.sub, bold = true), params(28))
         root.addView(
             label(
@@ -253,6 +260,129 @@ class MainActivity : Activity() {
             ),
             params(8)
         )
+    }
+
+    // ---------------- Нецензурные прымаўки ----------------
+    private fun addAdultToggle(root: LinearLayout, pal: Palette) {
+        root.addView(label("ПРЫМАЎКІ", 12f, pal.sub, bold = true), params(28))
+        val cb = CheckBox(this).apply {
+            text = "Включать нецензурные прымаўки (67)"
+            setTextColor(pal.text)
+            buttonTintList = ColorStateList.valueOf(pal.main)
+            isChecked = Prefs.showAdult(this@MainActivity)
+            setOnCheckedChangeListener { _, on ->
+                Prefs.setShowAdult(this@MainActivity, on)
+                WordWidgetProvider.updateAll(this@MainActivity)
+            }
+        }
+        root.addView(cb, params(6))
+        root.addView(
+            label(
+                "Грубая лексика будет видна на виджете на главном экране. Отключите, если не хотите её показывать.",
+                13f, pal.sub
+            ),
+            params(4)
+        )
+    }
+
+    // ---------------- Мои прымаўки ----------------
+    private fun parseProverbs(text: String): List<Proverb> {
+        // «Прымаўка. — пояснение» делится на текст и значение
+        val sep = Regex("""([.!?…»"”])\s+[—–-]\s+""")
+        return text.lines().map { it.trim() }.filter { it.isNotEmpty() }.map { line ->
+            val m = sep.find(line)
+            if (m != null) {
+                Proverb(
+                    line.substring(0, m.range.first + 1).trim(),
+                    line.substring(m.range.last + 1).trim(),
+                    ""
+                )
+            } else {
+                Proverb(line, "", "")
+            }
+        }
+    }
+
+    private fun addCustomProverbs(root: LinearLayout, pal: Palette) {
+        root.addView(label("МОИ ПРЫМАЎКІ", 12f, pal.sub, bold = true), params(28))
+        root.addView(
+            label(
+                "Вставьте одну или несколько прымаўок, каждая с новой строки. " +
+                    "Если после прымаўки идёт « — » и пояснение, оно сохранится как значение.",
+                13f, pal.sub
+            ),
+            params(6)
+        )
+        val input = EditText(this).apply {
+            hint = "Прымаўкі…"
+            setHintTextColor(pal.sub)
+            setTextColor(pal.text)
+            textSize = 15f
+            minLines = 3
+            gravity = Gravity.TOP or Gravity.START
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            background = GradientDrawable().apply {
+                setColor(pal.card)
+                cornerRadius = dp(12).toFloat()
+                setStroke(dp(1), pal.main)
+            }
+        }
+        root.addView(input, params(8))
+        root.addView(
+            pill("Добавить", pal) {
+                val items = parseProverbs(input.text.toString())
+                if (items.isNotEmpty()) {
+                    Prefs.addCustomProverbs(this, items)
+                    WordWidgetProvider.updateAll(this)
+                    build()
+                }
+            },
+            params(10, wrap = true)
+        )
+
+        val custom = Prefs.customProverbs(this)
+        if (custom.isNotEmpty()) {
+            val only = CheckBox(this).apply {
+                text = "Показывать только мои"
+                setTextColor(pal.text)
+                buttonTintList = ColorStateList.valueOf(pal.main)
+                isChecked = Prefs.onlyCustom(this@MainActivity)
+                setOnCheckedChangeListener { _, on ->
+                    Prefs.setOnlyCustom(this@MainActivity, on)
+                    WordWidgetProvider.updateAll(this@MainActivity)
+                }
+            }
+            root.addView(only, params(10))
+            root.addView(label("Добавлено: ${custom.size}", 13f, pal.sub), params(8))
+            for (x in custom) root.addView(customRow(x, pal), params(8))
+        }
+    }
+
+    private fun customRow(x: Proverb, pal: Palette): View {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(14), dp(10), dp(6), dp(10))
+            background = GradientDrawable().apply {
+                setColor(pal.card)
+                cornerRadius = dp(12).toFloat()
+            }
+        }
+        val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        col.addView(label(x.p, 15f, pal.text, bold = true))
+        if (x.m.isNotEmpty()) col.addView(label(x.m, 13f, pal.sub), params(2))
+        row.addView(col, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        val remove = label("✕", 18f, pal.sub).apply {
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+            setOnClickListener {
+                Prefs.removeCustomProverb(this@MainActivity, x.p)
+                WordWidgetProvider.updateAll(this@MainActivity)
+                build()
+            }
+        }
+        row.addView(remove)
+        return row
     }
 
     // ---------------- Тема ----------------
