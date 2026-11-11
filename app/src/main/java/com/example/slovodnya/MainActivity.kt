@@ -266,7 +266,7 @@ class MainActivity : Activity() {
     private fun addAdultToggle(root: LinearLayout, pal: Palette) {
         root.addView(label("ПРЫМАЎКІ", 12f, pal.sub, bold = true), params(28))
         val cb = CheckBox(this).apply {
-            text = "Включать нецензурные прымаўки (67)"
+            text = "Включать подборку из 67 прымаўок"
             setTextColor(pal.text)
             buttonTintList = ColorStateList.valueOf(pal.main)
             isChecked = Prefs.showAdult(this@MainActivity)

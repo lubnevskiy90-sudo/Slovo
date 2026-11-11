@@ -63,22 +63,15 @@ object Words {
 }
 
 object Proverbs {
-    private var builtin: List<Proverb>? = null
-
-    private fun loadBuiltin(context: Context): List<Proverb> {
-        builtin?.let { return it }
-        val json = context.assets.open("proverbs.json").bufferedReader().use { it.readText() }
-        val arr = JSONArray(json)
-        val list = List(arr.length()) { i ->
-            val o = arr.getJSONObject(i)
-            Proverb(o.getString("p"), o.getString("m"), o.optString("a", ""))
-        }
-        builtin = list
-        return list
-    }
+    private val EMPTY = Proverb(
+        "Добавьте свои прымаўки в «Настройках»",
+        "Настройки → Мои прымаўкі",
+        ""
+    )
 
     private var adult: List<Proverb>? = null
 
+    /** Подборка пользователя (67 прымаўок, перенесены из его сообщения). */
     private fun loadAdult(context: Context): List<Proverb> {
         adult?.let { return it }
         val json = context.assets.open("proverbs_adult.json").bufferedReader().use { it.readText() }
@@ -91,16 +84,27 @@ object Proverbs {
         return list
     }
 
+    private fun base(context: Context): List<Proverb> =
+        if (Prefs.showAdult(context)) loadAdult(context) else emptyList()
+
     fun all(context: Context): List<Proverb> {
         val custom = Prefs.customProverbs(context)
         if (Prefs.onlyCustom(context) && custom.isNotEmpty()) return custom
-        val base = loadBuiltin(context) +
-            (if (Prefs.showAdult(context)) loadAdult(context) else emptyList())
-        return base + custom
+        return base(context) + custom
     }
 
+    /**
+     * Прымаўка дня. Если есть и подборка, и свои — они чередуются через день.
+     */
     fun today(context: Context): Proverb {
-        val list = all(context)
-        return list[(dayNumber() % list.size).toInt()]
+        val custom = Prefs.customProverbs(context)
+        val base = base(context)
+        val d = dayNumber()
+        if (Prefs.onlyCustom(context) && custom.isNotEmpty()) return custom[(d % custom.size).toInt()]
+        if (custom.isEmpty() && base.isEmpty()) return EMPTY
+        if (base.isEmpty()) return custom[(d % custom.size).toInt()]
+        if (custom.isEmpty()) return base[(d % base.size).toInt()]
+        return if (d % 2L == 0L) custom[((d / 2) % custom.size).toInt()]
+        else base[((d / 2) % base.size).toInt()]
     }
 }
